@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerElement = document.getElementById('timer');
     const resultsElement = document.getElementById('results');
     const keypadElement = document.querySelector('.keypad .grid');
+    const eraseButton = document.getElementById('erase-button');
   
     let startTime = null;
     let timerInterval = null;
@@ -28,13 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let i = 0; i < 81; i++) {
         const cell = document.createElement('input');
         cell.type = 'text';
-        cell.readOnly = true; // Make the cell read-only; input via keypad
+        cell.readOnly = false; // Allow keyboard input
+        cell.maxLength = 1;
         cell.dataset.index = i;
         cell.value = puzzle[i] !== '.' ? puzzle[i] : '';
         if (puzzle[i] !== '.') {
           cell.disabled = true;
         } else {
-          cell.addEventListener('click', () => selectCell(cell));
+          cell.addEventListener('focus', () => selectCell(cell));
+          cell.addEventListener('input', onCellInput);
         }
         gridElement.appendChild(cell);
       }
@@ -47,6 +50,46 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       selectedCell = cell;
       selectedCell.classList.add('selected');
+    }
+  
+    // Function to handle cell input via keyboard
+    function onCellInput(e) {
+      const value = e.target.value;
+      const index = parseInt(e.target.dataset.index);
+      if (value >= '1' && value <= '9') {
+        puzzleBoard[index] = parseInt(value);
+      } else {
+        puzzleBoard[index] = 0;
+        e.target.value = '';
+      }
+  
+      // Check for errors if highlighting is enabled
+      if (errorHighlighting) {
+        if (checkConflicts(index, puzzleBoard[index])) {
+          e.target.classList.add('error');
+        } else {
+          e.target.classList.remove('error');
+        }
+      } else {
+        e.target.classList.remove('error');
+      }
+  
+      // Save game state
+      saveGameState();
+  
+      // Check for completion
+      if (isComplete()) {
+        if (isSolved()) {
+          clearInterval(timerInterval);
+          setTimeout(() => {
+            alert(`Congratulations! You solved the puzzle in ${formatTime(new Date() - startTime)}.`);
+            saveResult();
+            loadResults();
+          }, 100);
+        } else {
+          alert('There are errors in your solution.');
+        }
+      }
     }
   
     // Function to handle keypad input
@@ -90,22 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to create the keypad
     function createKeypad() {
       keypadElement.innerHTML = '';
-  
-      const keypadNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-      // Insert the erase button in the middle (after the 4th element)
-      keypadNumbers.splice(4, 0, 'erase'); // Insert 'erase' at index 4
-  
-      keypadNumbers.forEach(value => {
+      for (let i = 1; i <= 9; i++) {
         const button = document.createElement('button');
-        if (value === 'erase') {
-          button.innerHTML = '<i class="fa-solid fa-eraser"></i>';
-          button.addEventListener('click', eraseCell);
-        } else {
-          button.textContent = value;
-          button.addEventListener('click', () => onKeypadInput(value));
-        }
+        button.textContent = i;
+        button.addEventListener('click', () => onKeypadInput(i));
         keypadElement.appendChild(button);
-      });
+      }
     }
   
     // Function to erase the selected cell
@@ -123,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Function to check for conflicts
     function checkConflicts(index, value) {
+      if (value === 0) return false; // Empty cell
+  
       const row = Math.floor(index / 9);
       const col = index % 9;
   
@@ -470,6 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hintButton.addEventListener('click', provideHint);
     darkModeToggle.addEventListener('click', toggleDarkMode);
     errorToggle.addEventListener('click', toggleErrorHighlighting);
+    eraseButton.addEventListener('click', eraseCell);
   
     // Initialize the game
     loadGameState();

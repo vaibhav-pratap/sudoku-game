@@ -185,17 +185,22 @@
     margin: 2px;
   }
   
+  .floating-bar select {
+    height: 42px; /* Match the height of buttons */
+  }
+  
   /* Keypad Styling */
   .keypad {
     width: 100%;
     max-width: 300px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   
   .keypad .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    width: 100%;
   }
   
   .keypad button {
@@ -269,6 +274,11 @@
   
   .result-card .card-content {
     font-size: 1rem;
+    color: #1F2937;
+  }
+  
+  .dark .result-card .card-content {
+    color: #F9FAFB;
   }
   
   .result-card .card-content .label {
