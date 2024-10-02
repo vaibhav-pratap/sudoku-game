@@ -1,0 +1,91 @@
+/* css/styles.css */
+
+/* Container for the Sudoku grid */
+.sudoku-container {
+    width: 100%;
+    max-width: 400px; /* Adjust for desired size */
+    margin: 0 auto;
+  }
+  
+  /* Sudoku Grid */
+  .sudoku-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    aspect-ratio: 1 / 1;
+    border: 2px solid #4B5563; /* Gray-600 */
+  }
+  
+  /* Sudoku Cells */
+  .sudoku-grid input {
+    border: 1px solid #9CA3AF; /* Gray-400 */
+    width: 100%;
+    height: 100%;
+    font-size: 1.25rem;
+    text-align: center;
+    background-color: #F9FAFB; /* Gray-50 */
+    color: #1F2937; /* Gray-800 */
+    outline: none;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  
+  /* Dark Mode Cells */
+  .dark .sudoku-grid input {
+    background-color: #1F2937; /* Gray-800 */
+    color: #F9FAFB; /* Gray-50 */
+    border-color: #374151; /* Gray-700 */
+  }
+  
+  /* Thicker Borders to Separate 3x3 Boxes */
+  .sudoku-grid input:nth-child(3n) {
+    border-right: 2px solid #4B5563; /* Gray-600 */
+  }
+  
+  .sudoku-grid input:nth-child(n + 19):nth-child(-n + 27),
+  .sudoku-grid input:nth-child(n + 46):nth-child(-n + 54) {
+    border-bottom: 2px solid #4B5563; /* Gray-600 */
+  }
+  
+  /* Focus and Hover Effects */
+  .sudoku-grid input:hover {
+    background-color: #E5E7EB; /* Gray-200 */
+  }
+  
+  .sudoku-grid input:focus {
+    background-color: #D1D5DB; /* Gray-300 */
+    border-color: #2563EB; /* Blue-600 */
+  }
+  
+  .dark .sudoku-grid input:hover {
+    background-color: #374151; /* Gray-700 */
+  }
+  
+  .dark .sudoku-grid input:focus {
+    background-color: #4B5563; /* Gray-600 */
+    border-color: #3B82F6; /* Blue-500 */
+  }
+  
+  /* Disabled Input Styling */
+  .sudoku-grid input:disabled {
+    background-color: #9CA3AF; /* Gray-400 */
+    color: #1F2937; /* Gray-800 */
+    cursor: default;
+  }
+  
+  .dark .sudoku-grid input:disabled {
+    background-color: #4B5563; /* Gray-600 */
+    color: #D1D5DB; /* Gray-300 */
+  }
+  
+  /* Adjust font and spacing for the rest of the page */
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2 {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  select, button {
+    font-family: 'Inter', sans-serif;
+  }
+  
