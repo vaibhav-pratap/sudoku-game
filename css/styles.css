@@ -2,301 +2,365 @@
 
 /* Container for the Sudoku grid */
 .sudoku-container {
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-  
-  /* Sudoku Grid */
-  .sudoku-grid {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    aspect-ratio: 1 / 1;
-    border: 2px solid #4B5563;
-    box-sizing: content-box;
-    animation: fadeIn 0.5s ease-in-out;
-  }
-  
-  /* Sudoku Cells */
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Sudoku Grid */
+.sudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  aspect-ratio: 1 / 1;
+  border: 2px solid #4B5563;
+  box-sizing: content-box;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Sudoku Cells */
+.sudoku-grid input {
+  border: 1px solid #9CA3AF;
+  width: 100%;
+  height: 100%;
+  font-size: 1.25rem;
+  text-align: center;
+  background-color: #F9FAFB;
+  color: #1F2937;
+  outline: none;
+  box-sizing: border-box;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  cursor: pointer;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Adjust font size for mobile */
+@media (max-width: 640px) {
   .sudoku-grid input {
-    border: 1px solid #9CA3AF;
-    width: 100%;
-    height: 100%;
     font-size: 1rem;
-    text-align: center;
-    background-color: #F9FAFB;
-    color: #1F2937;
-    outline: none;
-    box-sizing: border-box;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    cursor: pointer;
-    animation: fadeIn 0.5s ease-in-out;
   }
-  
-  /* Selected Cell */
-  .sudoku-grid input.selected {
-    background-color: #BFDBFE;
-    border-color: #2563EB;
-  }
-  
-  .dark .sudoku-grid input.selected {
-    background-color: #1E3A8A;
-  }
-  
-  /* Dark Mode Cells */
-  .dark .sudoku-grid input {
-    background-color: #1F2937;
-    color: #F9FAFB;
-    border-color: #374151;
-  }
-  
-  /* Hover and Focus Effects */
-  .sudoku-grid input:hover {
-    background-color: #E5E7EB;
-  }
-  
-  .sudoku-grid input:focus {
-    background-color: #D1D5DB;
-    border-color: #2563EB;
-  }
-  
-  .dark .sudoku-grid input:hover {
-    background-color: #374151;
-  }
-  
-  .dark .sudoku-grid input:focus {
-    background-color: #4B5563;
-    border-color: #3B82F6;
-  }
-  
-  /* Disabled Input Styling */
-  .sudoku-grid input:disabled {
-    background-color: #9CA3AF;
-    color: #1F2937;
-    cursor: default;
-  }
-  
-  .dark .sudoku-grid input:disabled {
-    background-color: #4B5563;
-    color: #D1D5DB;
-  }
-  
-  /* Error Highlighting */
-  .sudoku-grid input.error {
-    background-color: #FECACA;
-    animation: shake 0.3s ease-in-out;
-  }
-  
-  .dark .sudoku-grid input.error {
-    background-color: #B91C1C;
-    color: #F9FAFB;
-  }
-  
-  /* Hint Cell Styling */
-  .sudoku-grid input.hint-cell {
-    background-color: #D1FAE5;
-  }
-  
-  .dark .sudoku-grid input.hint-cell {
-    background-color: #047857;
-    color: #F9FAFB;
-  }
-  
-  /* Floating Bar Styling */
+}
+
+/* Selected Cell */
+.sudoku-grid input.selected {
+  background-color: #BFDBFE;
+  border-color: #2563EB;
+}
+
+.dark .sudoku-grid input.selected {
+  background-color: #1E3A8A;
+}
+
+/* Dark Mode Cells */
+.dark .sudoku-grid input {
+  background-color: #1F2937;
+  color: #F9FAFB;
+  border-color: #374151;
+}
+
+/* Hover and Focus Effects */
+.sudoku-grid input:hover {
+  background-color: #E5E7EB;
+}
+
+.sudoku-grid input:focus {
+  background-color: #D1D5DB;
+  border-color: #2563EB;
+}
+
+.dark .sudoku-grid input:hover {
+  background-color: #374151;
+}
+
+.dark .sudoku-grid input:focus {
+  background-color: #4B5563;
+  border-color: #3B82F6;
+}
+
+/* Disabled Input Styling */
+.sudoku-grid input:disabled {
+  background-color: #9CA3AF;
+  color: #1F2937;
+  cursor: default;
+}
+
+.dark .sudoku-grid input:disabled {
+  background-color: #4B5563;
+  color: #D1D5DB;
+}
+
+/* Error Highlighting */
+.sudoku-grid input.error {
+  background-color: #FECACA;
+  animation: shake 0.3s ease-in-out;
+}
+
+.dark .sudoku-grid input.error {
+  background-color: #B91C1C;
+  color: #F9FAFB;
+}
+
+/* Hint Cell Styling */
+.sudoku-grid input.hint-cell {
+  background-color: #D1FAE5;
+}
+
+.dark .sudoku-grid input.hint-cell {
+  background-color: #047857;
+  color: #F9FAFB;
+}
+
+/* Floating Bar Styling */
+.floating-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90%;
+  width: 100%;
+  padding: 10px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  z-index: 10;
+}
+
+.floating-bar div,
+.floating-bar button,
+.floating-bar select {
+  margin: 2px;
+}
+
+.floating-bar button,
+.floating-bar select {
+  height: 42px; /* Ensure consistent height */
+}
+
+.floating-bar select {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.floating-bar button {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.floating-bar .flex.items-center.space-x-2 {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+/* Adjust floating bar for mobile */
+@media (max-width: 640px) {
   .floating-bar {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 90%;
-    width: 100%;
-    padding: 10px;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    flex-wrap: wrap;
+    bottom: 0;
+    padding: 5px;
+    border-radius: 0;
   }
-  
+
+  .floating-bar button,
+  .floating-bar select {
+    padding: 5px;
+    font-size: 0.9rem;
+    height: 36px;
+  }
+
+  .floating-bar span {
+    display: none;
+  }
+
+  .floating-bar i {
+    margin-right: 0;
+  }
+}
+
+/* Keypad Styling */
+.keypad {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.keypad .grid {
+  width: 100%;
+}
+
+.keypad button {
+  width: 100%;
+  padding: 12px 0;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border: 1px solid #9CA3AF;
+  background-color: #F3F4F6;
+  color: #1F2937;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.keypad button:hover {
+  background-color: #E5E7EB;
+}
+
+.dark .keypad button {
+  background-color: #374151;
+  color: #F3F4F6;
+  border-color: #4B5563;
+}
+
+.dark .keypad button:hover {
+  background-color: #4B5563;
+}
+
+/* Hide keypad on devices smaller than 1536px */
+@media (max-width: 1535px) {
+  .keypad {
+    display: none;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+/* Result Cards */
+.result-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 16px;
+  transition: transform 0.2s;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.result-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .result-card {
+  background-color: #1F2937;
+  border-color: #374151;
+}
+
+.result-card .card-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.result-card .card-content {
+  font-size: 1rem;
+  color: #1F2937;
+}
+
+.dark .result-card .card-content {
+  color: #F9FAFB;
+}
+
+.result-card .card-content .label {
+  font-weight: bold;
+}
+
+.result-card .card-content .value {
+  margin-left: 4px;
+}
+
+.result-card .card-date {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.dark .result-card .card-date {
+  color: #9CA3AF;
+}
+
+/* Clearer 3x3 Grid Borders */
+.sudoku-grid input {
+  border: 1px solid #9CA3AF;
+}
+
+.sudoku-grid input:nth-child(9n+1) {
+  border-left: 2px solid #4B5563;
+}
+
+.sudoku-grid input:nth-child(-n+9) {
+  border-top: 2px solid #4B5563;
+}
+
+.sudoku-grid input:nth-child(9n) {
+  border-right: 2px solid #4B5563;
+}
+
+.sudoku-grid input:nth-last-child(-n+9) {
+  border-bottom: 2px solid #4B5563;
+}
+
+.sudoku-grid input:nth-child(n+19):nth-child(-n+27),
+.sudoku-grid input:nth-child(n+46):nth-child(-n+54) {
+  border-bottom: 2px solid #4B5563;
+}
+
+.sudoku-grid input:nth-child(3n) {
+  border-right: 2px solid #4B5563;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1280px) {
+  .flex-col {
+    flex-direction: column !important;
+  }
+
+  .2xl\:mt-0 {
+    margin-top: 0 !important;
+  }
+
+  .2xl\:ml-8 {
+    margin-left: 0 !important;
+  }
+
+  .keypad {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .floating-bar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+  }
+
   .floating-bar div,
   .floating-bar button,
   .floating-bar select {
     margin: 2px;
   }
-  
-  .floating-bar select {
-    height: 42px; /* Match the height of buttons */
+
+  .sudoku-container {
+    max-width: 100%;
   }
-  
-  /* Keypad Styling */
-  .keypad {
-    width: 100%;
-    max-width: 300px;
+
+  .sudoku-grid {
+    max-width: 350px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
-  
-  .keypad .grid {
-    width: 100%;
-  }
-  
-  .keypad button {
-    width: 100%;
-    padding: 12px 0;
-    font-size: 1.25rem;
-    font-weight: bold;
-    border: 1px solid #9CA3AF;
-    background-color: #F3F4F6;
-    color: #1F2937;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-  }
-  
-  .keypad button:hover {
-    background-color: #E5E7EB;
-  }
-  
-  .dark .keypad button {
-    background-color: #374151;
-    color: #F3F4F6;
-    border-color: #4B5563;
-  }
-  
-  .dark .keypad button:hover {
-    background-color: #4B5563;
-  }
-  
-  /* Animations */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  
-  @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0); }
-  }
-  
-  /* Result Cards */
-  .result-card {
-    background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    padding: 16px;
-    transition: transform 0.2s;
-    animation: fadeIn 0.5s ease-in-out;
-  }
-  
-  .result-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .dark .result-card {
-    background-color: #1F2937;
-    border-color: #374151;
-  }
-  
-  .result-card .card-icon {
-    font-size: 2rem;
-    margin-bottom: 8px;
-  }
-  
-  .result-card .card-content {
-    font-size: 1rem;
-    color: #1F2937;
-  }
-  
-  .dark .result-card .card-content {
-    color: #F9FAFB;
-  }
-  
-  .result-card .card-content .label {
-    font-weight: bold;
-  }
-  
-  .result-card .card-content .value {
-    margin-left: 4px;
-  }
-  
-  .result-card .card-date {
-    font-size: 0.875rem;
-    color: #6B7280;
-  }
-  
-  .dark .result-card .card-date {
-    color: #9CA3AF;
-  }
-  
-  /* Clearer 3x3 Grid Borders */
-  .sudoku-grid input {
-    border: 1px solid #9CA3AF;
-  }
-  
-  .sudoku-grid input:nth-child(9n+1) {
-    border-left: 2px solid #4B5563;
-  }
-  
-  .sudoku-grid input:nth-child(-n+9) {
-    border-top: 2px solid #4B5563;
-  }
-  
-  .sudoku-grid input:nth-child(9n) {
-    border-right: 2px solid #4B5563;
-  }
-  
-  .sudoku-grid input:nth-last-child(-n+9) {
-    border-bottom: 2px solid #4B5563;
-  }
-  
-  .sudoku-grid input:nth-child(n+19):nth-child(-n+27),
-  .sudoku-grid input:nth-child(n+46):nth-child(-n+54) {
-    border-bottom: 2px solid #4B5563;
-  }
-  
-  .sudoku-grid input:nth-child(3n) {
-    border-right: 2px solid #4B5563;
-  }
-  
-  /* Responsive Adjustments */
-  @media (max-width: 1024px) {
-    .flex-col {
-      flex-direction: column !important;
-    }
-    
-    .lg\:mt-0 {
-      margin-top: 0 !important;
-    }
-    
-    .lg\:ml-8 {
-      margin-left: 0 !important;
-    }
-    
-    .keypad {
-      max-width: 500px;
-    }
-  }
-  
-  @media (max-width: 640px) {
-    .floating-bar {
-      flex-direction: column;
-      align-items: center;
-    }
-  
-    .floating-bar div,
-    .floating-bar button,
-    .floating-bar select {
-      margin: 4px 0;
-    }
-  }
-  
+}
