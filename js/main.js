@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsElement = document.getElementById('results');
   const keypadElement = document.querySelector('.keypad .grid');
   const eraseButton = document.getElementById('erase-button');
-  const isDesktop = window.innerWidth >= 1536; // Adjusted breakpoint for desktop
+  const isDesktop = window.innerWidth >= 1024; // Adjusted breakpoint for desktop
 
   let startTime = null;
   let timerInterval = null;
@@ -39,13 +39,19 @@ document.addEventListener('DOMContentLoaded', () => {
       // Set input mode to numeric on mobile and tablet devices
       if (!isDesktop) {
         cell.setAttribute('inputmode', 'numeric');
-        cell.setAttribute('pattern', '[1-9]*');
+        cell.setAttribute('pattern', '[1-9]');
       }
       if (puzzle[i] !== '.') {
         cell.disabled = true;
       } else {
         cell.addEventListener('focus', () => selectCell(cell));
         cell.addEventListener('input', onCellInput);
+        // Prevent multiple digits
+        cell.addEventListener('keypress', (e) => {
+          if (cell.value.length >= 1 || !/[1-9]/.test(e.key)) {
+            e.preventDefault();
+          }
+        });
       }
       gridElement.appendChild(cell);
     }
@@ -58,19 +64,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     selectedCell = cell;
     selectedCell.classList.add('selected');
-    selectedCell.focus();
   }
 
   // Function to handle cell input via keyboard or mobile keyboard
   function onCellInput(e) {
     const value = e.target.value;
     const index = parseInt(e.target.dataset.index);
-    if (value >= '1' && value <= '9') {
+    if (/^[1-9]$/.test(value)) {
       puzzleBoard[index] = parseInt(value);
     } else {
       puzzleBoard[index] = 0;
       e.target.value = '';
     }
+
+    // Ensure only one digit is entered
+    e.target.value = e.target.value.slice(0, 1);
 
     // Check for errors if highlighting is enabled
     if (errorHighlighting) {
@@ -280,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Function to start a new game
   function startNewGame() {
     clearInterval(timerInterval);
-    startTimer();
     const difficulty = difficultySelect.value;
     const completeBoard = generateCompleteBoard();
     solution = completeBoard.slice();
@@ -289,17 +296,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const puzzleString = puzzleBoard.map(num => (num === 0 ? '.' : num)).join('');
     generateGrid(puzzleString);
     createKeypad();
+    startTimer();
     saveGameState();
   }
 
   // Function to reset the game
   function resetGame() {
     clearInterval(timerInterval);
-    startTimer();
     puzzleBoard = initialPuzzle.slice();
     const puzzleString = puzzleBoard.map(num => (num === 0 ? '.' : num)).join('');
     generateGrid(puzzleString);
     createKeypad();
+    startTimer();
     saveGameState();
   }
 

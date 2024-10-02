@@ -31,6 +31,7 @@
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
   cursor: pointer;
   animation: fadeIn 0.5s ease-in-out;
+  caret-color: transparent; /* Hide blinking cursor */
 }
 
 /* Adjust font size for mobile */
@@ -157,8 +158,11 @@
 @media (max-width: 640px) {
   .floating-bar {
     bottom: 0;
-    padding: 5px;
+    padding: 5px 10px; /* Reduced padding for a slimmer bar */
     border-radius: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .floating-bar button,
@@ -169,11 +173,36 @@
   }
 
   .floating-bar span {
-    display: none;
+    display: none; /* Hide text labels to save space */
   }
 
   .floating-bar i {
     margin-right: 0;
+  }
+
+  /* Center the "Sudoku Game" text and timer */
+  .floating-bar .flex.flex-col.items-center.mt-2.md\:mt-0 {
+    margin-top: 0;
+    margin-bottom: 0;
+    flex: 1 1 auto;
+    order: -1; /* Move to the top */
+    align-items: center;
+  }
+
+  /* Adjust alignment of left and right sections */
+  .floating-bar > div:first-child,
+  .floating-bar > div:last-child {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .floating-bar div {
+    margin: 0 2px; /* Reduce margins */
+  }
+
+  .floating-bar button,
+  .floating-bar select {
+    margin: 0 2px; /* Reduce margins */
   }
 }
 
@@ -217,8 +246,8 @@
   background-color: #4B5563;
 }
 
-/* Hide keypad on devices smaller than 1536px */
-@media (max-width: 1535px) {
+/* Hide keypad on devices smaller than 1024px */
+@media (max-width: 1023px) {
   .keypad {
     display: none;
   }
@@ -324,16 +353,16 @@
 }
 
 /* Responsive Adjustments */
-@media (max-width: 1280px) {
+@media (max-width: 1024px) {
   .flex-col {
     flex-direction: column !important;
   }
 
-  .2xl\:mt-0 {
+  .lg\:mt-0 {
     margin-top: 0 !important;
   }
 
-  .2xl\:ml-8 {
+  .lg\:ml-8 {
     margin-left: 0 !important;
   }
 
@@ -343,18 +372,6 @@
 }
 
 @media (max-width: 640px) {
-  .floating-bar {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-  }
-
-  .floating-bar div,
-  .floating-bar button,
-  .floating-bar select {
-    margin: 2px;
-  }
-
   .sudoku-container {
     max-width: 100%;
   }
