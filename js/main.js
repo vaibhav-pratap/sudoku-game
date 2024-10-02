@@ -65,6 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           selectedCell.classList.remove('error');
         }
+      } else {
+        selectedCell.classList.remove('error');
       }
   
       // Save game state
@@ -88,17 +90,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to create the keypad
     function createKeypad() {
       keypadElement.innerHTML = '';
-      for (let i = 1; i <= 9; i++) {
+  
+      const keypadNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      // Insert the erase button in the middle (after the 4th element)
+      keypadNumbers.splice(4, 0, 'erase'); // Insert 'erase' at index 4
+  
+      keypadNumbers.forEach(value => {
         const button = document.createElement('button');
-        button.textContent = i;
-        button.addEventListener('click', () => onKeypadInput(i));
+        if (value === 'erase') {
+          button.innerHTML = '<i class="fa-solid fa-eraser"></i>';
+          button.addEventListener('click', eraseCell);
+        } else {
+          button.textContent = value;
+          button.addEventListener('click', () => onKeypadInput(value));
+        }
         keypadElement.appendChild(button);
-      }
-      // Add an erase button
-      const eraseButton = document.createElement('button');
-      eraseButton.innerHTML = '<i class="fa-solid fa-eraser"></i>';
-      eraseButton.addEventListener('click', eraseCell);
-      keypadElement.appendChild(eraseButton);
+      });
     }
   
     // Function to erase the selected cell
@@ -268,6 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
       puzzleBoard = initialPuzzle.slice();
       const puzzleString = puzzleBoard.map(num => (num === 0 ? '.' : num)).join('');
       generateGrid(puzzleString);
+      createKeypad();
       saveGameState();
     }
   
@@ -351,18 +359,18 @@ document.addEventListener('DOMContentLoaded', () => {
         content.className = 'card-content';
   
         const duration = document.createElement('div');
-        duration.innerHTML = `<span class="label">Duration:</span><span class="value">${result.duration} seconds</span>`;
+        duration.innerHTML = `<span class="label"><i class="fa-solid fa-clock"></i> Duration:</span><span class="value"> ${result.duration} seconds</span>`;
         content.appendChild(duration);
   
         const difficulty = document.createElement('div');
-        difficulty.innerHTML = `<span class="label">Difficulty:</span><span class="value capitalize">${result.difficulty}</span>`;
+        difficulty.innerHTML = `<span class="label"><i class="fa-solid fa-signal"></i> Difficulty:</span><span class="value capitalize"> ${result.difficulty}</span>`;
         content.appendChild(difficulty);
   
         card.appendChild(content);
   
         const date = document.createElement('div');
         date.className = 'card-date mt-2';
-        date.textContent = new Date(result.date).toLocaleString();
+        date.innerHTML = `<i class="fa-solid fa-calendar-alt"></i> ${new Date(result.date).toLocaleString()}`;
         card.appendChild(date);
   
         resultsElement.appendChild(card);
