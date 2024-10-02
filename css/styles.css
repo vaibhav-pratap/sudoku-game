@@ -50,66 +50,6 @@
     border-color: #374151;
   }
   
-  /* Thicker Borders to Separate 3x3 Boxes */
-  .sudoku-grid input {
-    position: relative;
-  }
-  
-  .sudoku-grid input::before,
-  .sudoku-grid input::after {
-    content: '';
-    position: absolute;
-    background-color: #4B5563;
-    z-index: 1;
-  }
-  
-  /* Vertical Borders */
-  .sudoku-grid input:nth-child(3n + 1)::before {
-    width: 2px;
-    height: 100%;
-    left: -1px;
-    top: 0;
-  }
-  
-  .sudoku-grid input:nth-child(9n)::after {
-    width: 2px;
-    height: 100%;
-    right: -1px;
-    top: 0;
-  }
-  
-  /* Horizontal Borders */
-  .sudoku-grid input:nth-child(-n + 9)::before {
-    width: 100%;
-    height: 2px;
-    left: 0;
-    top: -1px;
-  }
-  
-  .sudoku-grid input:nth-last-child(-n + 9)::after {
-    width: 100%;
-    height: 2px;
-    left: 0;
-    bottom: -1px;
-  }
-  
-  /* Additional Horizontal Borders for 3x3 Boxes */
-  .sudoku-grid input:nth-child(n + 19):nth-child(-n + 27)::after,
-  .sudoku-grid input:nth-child(n + 46):nth-child(-n + 54)::after {
-    width: 100%;
-    height: 2px;
-    left: 0;
-    bottom: -1px;
-  }
-  
-  /* Additional Vertical Borders for 3x3 Boxes */
-  .sudoku-grid input:nth-child(3n)::after {
-    width: 2px;
-    height: 100%;
-    right: -1px;
-    top: 0;
-  }
-  
   /* Hover and Focus Effects */
   .sudoku-grid input:hover {
     background-color: #E5E7EB;
@@ -298,17 +238,47 @@
     color: #9CA3AF;
   }
   
+  /* Clearer 3x3 Grid Borders */
+  .sudoku-grid input {
+    border: 1px solid #9CA3AF;
+  }
+  
+  .sudoku-grid input:nth-child(9n+1) {
+    border-left: 2px solid #4B5563;
+  }
+  
+  .sudoku-grid input:nth-child(-n+9) {
+    border-top: 2px solid #4B5563;
+  }
+  
+  .sudoku-grid input:nth-child(9n) {
+    border-right: 2px solid #4B5563;
+  }
+  
+  .sudoku-grid input:nth-last-child(-n+9) {
+    border-bottom: 2px solid #4B5563;
+  }
+  
+  .sudoku-grid input:nth-child(n+19):nth-child(-n+27),
+  .sudoku-grid input:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 2px solid #4B5563;
+  }
+  
+  .sudoku-grid input:nth-child(3n) {
+    border-right: 2px solid #4B5563;
+  }
+  
   /* Responsive Adjustments */
   @media (max-width: 1024px) {
     .flex-col {
       flex-direction: column !important;
     }
     
-    .lg\\:mt-0 {
+    .lg\:mt-0 {
       margin-top: 0 !important;
     }
     
-    .lg\\:ml-8 {
+    .lg\:ml-8 {
       margin-left: 0 !important;
     }
     

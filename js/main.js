@@ -209,55 +209,59 @@ document.addEventListener('DOMContentLoaded', () => {
       return `${minutes}:${seconds}`;
     }
   
-    // Function to generate a complete, valid Sudoku board
+      // Function to generate a complete, valid Sudoku board
     function generateCompleteBoard() {
-      const board = Array(81).fill(0);
-  
-      function isValid(num, pos) {
+        const board = Array(81).fill(0);
+
+        function isValid(num, pos, board) {
         const row = Math.floor(pos / 9);
         const col = pos % 9;
-  
+
         // Check row
         for (let i = 0; i < 9; i++) {
-          if (board[row * 9 + i] === num) return false;
+            if (board[row * 9 + i] === num) return false;
         }
-  
+
         // Check column
         for (let i = 0; i < 9; i++) {
-          if (board[i * 9 + col] === num) return false;
+            if (board[i * 9 + col] === num) return false;
         }
-  
+
         // Check box
         const startRow = row - (row % 3);
         const startCol = col - (col % 3);
         for (let i = 0; i < 3; i++) {
-          for (let j = 0; j < 3; j++) {
+            for (let j = 0; j < 3; j++) {
             const idx = (startRow + i) * 9 + (startCol + j);
             if (board[idx] === num) return false;
-          }
+            }
         }
-  
+
         return true;
-      }
-  
-      function fillBoard(pos) {
-        if (pos >= 81) return true;
-  
-        const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        shuffleArray(nums);
-  
-        for (let num of nums) {
-          if (isValid(num, pos)) {
-            board[pos] = num;
-            if (fillBoard(pos + 1)) return true;
-            board[pos] = 0;
-          }
         }
-        return false;
-      }
-  
-      fillBoard(0);
-      return board;
+
+        function fillBoard(board) {
+        for (let i = 0; i < 81; i++) {
+            if (board[i] === 0) {
+            const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            shuffleArray(nums);
+            for (let num of nums) {
+                if (isValid(num, i, board)) {
+                board[i] = num;
+                if (fillBoard(board)) {
+                    return true;
+                }
+                board[i] = 0;
+                }
+            }
+            return false;
+            }
+        }
+        return true;
+        }
+
+        fillBoard(board);
+        return board;
     }
   
     // Function to remove numbers from the complete board based on difficulty
