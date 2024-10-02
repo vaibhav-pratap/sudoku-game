@@ -5,27 +5,124 @@ document.addEventListener('DOMContentLoaded', () => {
     const difficultySelect = document.getElementById('difficulty');
     const newGameButton = document.getElementById('new-game');
     const resultsElement = document.getElementById('results');
+    const timerElement = document.getElementById('timer');
+    const hintButton = document.getElementById('hint-button');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const darkModeIcon = document.getElementById('dark-mode-icon');
   
     let startTime = null;
+    let timerInterval = null;
+    let solution = null;
+    let puzzleBoard = null;
   
     // Function to generate the Sudoku grid
     function generateGrid(puzzle) {
-        gridElement.innerHTML = '';
-        for (let i = 0; i < 81; i++) {
+      gridElement.innerHTML = '';
+      for (let i = 0; i < 81; i++) {
         const cell = document.createElement('input');
         cell.type = 'text';
         cell.maxLength = 1;
-        cell.className = 'sudoku-cell bg-white dark:bg-gray-800 text-gray-900 dark:text-white';
+        cell.dataset.index = i;
+        cell.value = puzzle[i] !== '.' ? puzzle[i] : '';
         if (puzzle[i] !== '.') {
-            cell.value = puzzle[i];
-            cell.disabled = true;
+          cell.disabled = true;
         } else {
-            cell.value = '';
+          cell.addEventListener('input', onCellInput);
+          cell.addEventListener('focus', () => cell.select());
         }
         gridElement.appendChild(cell);
-        }
+      }
     }
   
+    // Function to handle cell input
+    function onCellInput(e) {
+      const cell = e.target;
+      const index = parseInt(cell.dataset.index);
+      const value = cell.value;
+  
+      // Remove non-numeric characters
+      if (!/^[1-9]$/.test(value)) {
+        cell.value = '';
+        return;
+      }
+  
+      // Update the puzzle board
+      puzzleBoard[index] = parseInt(value);
+  
+      // Check for errors
+      if (checkConflicts(index, parseInt(value))) {
+        cell.classList.add('error');
+      } else {
+        cell.classList.remove('error');
+      }
+  
+      // Check for completion
+      if (isComplete()) {
+        if (isSolved()) {
+          clearInterval(timerInterval);
+          setTimeout(() => {
+            alert(`Congratulations! You solved the puzzle in ${formatTime(new Date() - startTime)}.`);
+            saveResult();
+            loadResults();
+          }, 100);
+        } else {
+          alert('There are errors in your solution.');
+        }
+      }
+    }
+  
+    // Function to check for conflicts
+    function checkConflicts(index, value) {
+      const row = Math.floor(index / 9);
+      const col = index % 9;
+  
+      // Check row and column
+      for (let i = 0; i < 9; i++) {
+        const rowIndex = row * 9 + i;
+        const colIndex = i * 9 + col;
+        if (rowIndex !== index && puzzleBoard[rowIndex] === value) return true;
+        if (colIndex !== index && puzzleBoard[colIndex] === value) return true;
+      }
+  
+      // Check box
+      const startRow = row - (row % 3);
+      const startCol = col - (col % 3);
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          const idx = (startRow + i) * 9 + (startCol + j);
+          if (idx !== index && puzzleBoard[idx] === value) return true;
+        }
+      }
+  
+      return false;
+    }
+  
+    // Function to check if the puzzle is complete
+    function isComplete() {
+      return puzzleBoard.every(num => num !== 0);
+    }
+  
+    // Function to check if the puzzle is solved correctly
+    function isSolved() {
+      return puzzleBoard.join('') === solution.join('');
+    }
+  
+    // Function to start the timer
+    function startTimer() {
+      startTime = new Date();
+      timerInterval = setInterval(() => {
+        const elapsed = new Date() - startTime;
+        timerElement.textContent = `Time: ${formatTime(elapsed)}`;
+      }, 1000);
+    }
+  
+    // Function to format time in mm:ss
+    function formatTime(milliseconds) {
+      const totalSeconds = Math.floor(milliseconds / 1000);
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const seconds = String(totalSeconds % 60).padStart(2, '0');
+      return `${minutes}:${seconds}`;
+    }
   
     // Function to generate a complete, valid Sudoku board
     function generateCompleteBoard() {
@@ -37,12 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
         // Check row
         for (let i = 0; i < 9; i++) {
-          if (board[row * 9 + i] === num && (row * 9 + i) !== pos) return false;
+          if (board[row * 9 + i] === num) return false;
         }
   
         // Check column
         for (let i = 0; i < 9; i++) {
-          if (board[i * 9 + col] === num && (i * 9 + col) !== pos) return false;
+          if (board[i * 9 + col] === num) return false;
         }
   
         // Check box
@@ -51,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {
             const idx = (startRow + i) * 9 + (startCol + j);
-            if (board[idx] === num && idx !== pos) return false;
+            if (board[idx] === num) return false;
           }
         }
   
@@ -83,16 +180,16 @@ document.addEventListener('DOMContentLoaded', () => {
       let attempts;
       switch (difficulty) {
         case 'easy':
-          attempts = 3;
+          attempts = 30;
           break;
         case 'medium':
-          attempts = 5;
+          attempts = 40;
           break;
         case 'hard':
-          attempts = 7;
+          attempts = 50;
           break;
         default:
-          attempts = 5;
+          attempts = 40;
       }
   
       board = board.slice();
@@ -104,7 +201,57 @@ document.addEventListener('DOMContentLoaded', () => {
   
           // Make a copy to solve
           const boardCopy = board.slice();
-          if (!hasUniqueSolution(boardCopy)) {
+          let solutions = 0;
+  
+          function solve(pos) {
+            if (pos >= 81) {
+              solutions++;
+              return solutions === 1;
+            }
+  
+            if (boardCopy[pos] !== 0) {
+              return solve(pos + 1);
+            }
+  
+            for (let num = 1; num <= 9; num++) {
+              if (isValid(num, pos, boardCopy)) {
+                boardCopy[pos] = num;
+                if (!solve(pos + 1)) return false;
+                boardCopy[pos] = 0;
+              }
+            }
+            return true;
+          }
+  
+          function isValid(num, pos, board) {
+            const row = Math.floor(pos / 9);
+            const col = pos % 9;
+  
+            // Check row
+            for (let i = 0; i < 9; i++) {
+              if (board[row * 9 + i] === num) return false;
+            }
+  
+            // Check column
+            for (let i = 0; i < 9; i++) {
+              if (board[i * 9 + col] === num) return false;
+            }
+  
+            // Check box
+            const startRow = row - (row % 3);
+            const startCol = col - (col % 3);
+            for (let i = 0; i < 3; i++) {
+              for (let j = 0; j < 3; j++) {
+                const idx = (startRow + i) * 9 + (startCol + j);
+                if (board[idx] === num) return false;
+              }
+            }
+  
+            return true;
+          }
+  
+          solve(0);
+          if (solutions !== 1) {
             board[pos] = backup;
             attempts--;
           }
@@ -113,77 +260,44 @@ document.addEventListener('DOMContentLoaded', () => {
       return board;
     }
   
-    // Function to check if the board has a unique solution
-    function hasUniqueSolution(board) {
-      let solutions = 0;
-  
-      function solve(pos) {
-        if (pos >= 81) {
-          solutions++;
-          return solutions === 1;
-        }
-  
-        if (board[pos] !== 0) {
-          return solve(pos + 1);
-        }
-  
-        for (let num = 1; num <= 9; num++) {
-          if (isValid(num, pos, board)) {
-            board[pos] = num;
-            if (!solve(pos + 1)) return false;
-            board[pos] = 0;
-          }
-        }
-        return true;
-      }
-  
-      function isValid(num, pos, board) {
-        const row = Math.floor(pos / 9);
-        const col = pos % 9;
-  
-        // Check row
-        for (let i = 0; i < 9; i++) {
-          if (board[row * 9 + i] === num && (row * 9 + i) !== pos) return false;
-        }
-  
-        // Check column
-        for (let i = 0; i < 9; i++) {
-          if (board[i * 9 + col] === num && (i * 9 + col) !== pos) return false;
-        }
-  
-        // Check box
-        const startRow = row - (row % 3);
-        const startCol = col - (col % 3);
-        for (let i = 0; i < 3; i++) {
-          for (let j = 0; j < 3; j++) {
-            const idx = (startRow + i) * 9 + (startCol + j);
-            if (board[idx] === num && idx !== pos) return false;
-          }
-        }
-  
-        return true;
-      }
-  
-      solve(0);
-      return solutions === 1;
-    }
-  
-    // Function to shuffle an array
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-    }
-  
     // Function to start a new game
     function startNewGame() {
+      clearInterval(timerInterval);
+      startTimer();
       const difficulty = difficultySelect.value;
       const completeBoard = generateCompleteBoard();
-      const puzzleBoard = createPuzzle(completeBoard, difficulty);
+      solution = completeBoard.slice();
+      puzzleBoard = createPuzzle(completeBoard, difficulty);
       const puzzleString = puzzleBoard.map(num => (num === 0 ? '.' : num)).join('');
       generateGrid(puzzleString);
-      startTime = new Date();
+    }
+  
+    // Function to provide a hint
+    function provideHint() {
+      const emptyIndices = puzzleBoard
+        .map((num, idx) => (num === 0 ? idx : null))
+        .filter(idx => idx !== null);
+  
+      if (emptyIndices.length === 0) return;
+  
+      const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      puzzleBoard[randomIndex] = solution[randomIndex];
+  
+      const cells = gridElement.querySelectorAll('input');
+      const cell = cells[randomIndex];
+      cell.value = solution[randomIndex];
+      cell.disabled = true;
+      cell.classList.add('hint-cell');
+  
+      // Check for completion after providing a hint
+      if (isComplete() && isSolved()) {
+        clearInterval(timerInterval);
+        setTimeout(() => {
+          alert(`Congratulations! You solved the puzzle in ${formatTime(new Date() - startTime)}.`);
+          saveResult();
+          loadResults();
+        }, 100);
+      }
     }
   
     // Function to save the result
@@ -243,18 +357,31 @@ document.addEventListener('DOMContentLoaded', () => {
       resultsElement.appendChild(table);
     }
   
-    // Event listener for the "New Game" button
-    newGameButton.addEventListener('click', () => {
-      startNewGame();
-    });
+    // Function to toggle dark mode
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.theme = isDark ? 'dark' : 'light';
+      darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+    }
+  
+    // Utility Function to shuffle an array
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+  
+    // Event listeners
+    newGameButton.addEventListener('click', startNewGame);
+    hintButton.addEventListener('click', provideHint);
+    darkModeToggle.addEventListener('click', toggleDarkMode);
   
     // Initialize the game
     startNewGame();
     loadResults();
   
     // Save the result when the user leaves or refreshes the page
-    window.addEventListener('beforeunload', () => {
-      saveResult();
-    });
+    window.addEventListener('beforeunload', saveResult);
   });
   

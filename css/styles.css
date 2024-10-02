@@ -3,7 +3,7 @@
 /* Container for the Sudoku grid */
 .sudoku-container {
     width: 100%;
-    max-width: 400px; /* Adjust for desired size */
+    max-width: 500px;
     margin: 0 auto;
   }
   
@@ -12,71 +12,143 @@
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     aspect-ratio: 1 / 1;
-    border: 2px solid #4B5563; /* Gray-600 */
+    border: 2px solid #4B5563;
+    box-sizing: content-box;
   }
   
   /* Sudoku Cells */
   .sudoku-grid input {
-    border: 1px solid #9CA3AF; /* Gray-400 */
+    border: 1px solid #9CA3AF;
     width: 100%;
     height: 100%;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     text-align: center;
-    background-color: #F9FAFB; /* Gray-50 */
-    color: #1F2937; /* Gray-800 */
+    background-color: #F9FAFB;
+    color: #1F2937;
     outline: none;
-    transition: background-color 0.2s, color 0.2s;
+    box-sizing: border-box;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
   }
   
   /* Dark Mode Cells */
   .dark .sudoku-grid input {
-    background-color: #1F2937; /* Gray-800 */
-    color: #F9FAFB; /* Gray-50 */
-    border-color: #374151; /* Gray-700 */
+    background-color: #1F2937;
+    color: #F9FAFB;
+    border-color: #374151;
   }
   
   /* Thicker Borders to Separate 3x3 Boxes */
-  .sudoku-grid input:nth-child(3n) {
-    border-right: 2px solid #4B5563; /* Gray-600 */
+  .sudoku-grid input {
+    position: relative;
   }
   
-  .sudoku-grid input:nth-child(n + 19):nth-child(-n + 27),
-  .sudoku-grid input:nth-child(n + 46):nth-child(-n + 54) {
-    border-bottom: 2px solid #4B5563; /* Gray-600 */
+  .sudoku-grid input::before,
+  .sudoku-grid input::after {
+    content: '';
+    position: absolute;
+    background-color: #4B5563;
+    z-index: 1;
   }
   
-  /* Focus and Hover Effects */
+  /* Vertical Borders */
+  .sudoku-grid input:nth-child(3n + 1)::before {
+    width: 2px;
+    height: 100%;
+    left: -1px;
+    top: 0;
+  }
+  
+  .sudoku-grid input:nth-child(9n)::after {
+    width: 2px;
+    height: 100%;
+    right: -1px;
+    top: 0;
+  }
+  
+  /* Horizontal Borders */
+  .sudoku-grid input:nth-child(-n + 9)::before {
+    width: 100%;
+    height: 2px;
+    left: 0;
+    top: -1px;
+  }
+  
+  .sudoku-grid input:nth-last-child(-n + 9)::after {
+    width: 100%;
+    height: 2px;
+    left: 0;
+    bottom: -1px;
+  }
+  
+  /* Additional Horizontal Borders for 3x3 Boxes */
+  .sudoku-grid input:nth-child(n + 19):nth-child(-n + 27)::after,
+  .sudoku-grid input:nth-child(n + 46):nth-child(-n + 54)::after {
+    width: 100%;
+    height: 2px;
+    left: 0;
+    bottom: -1px;
+  }
+  
+  /* Additional Vertical Borders for 3x3 Boxes */
+  .sudoku-grid input:nth-child(3n)::after {
+    width: 2px;
+    height: 100%;
+    right: -1px;
+    top: 0;
+  }
+  
+  /* Hover and Focus Effects */
   .sudoku-grid input:hover {
-    background-color: #E5E7EB; /* Gray-200 */
+    background-color: #E5E7EB;
   }
   
   .sudoku-grid input:focus {
-    background-color: #D1D5DB; /* Gray-300 */
-    border-color: #2563EB; /* Blue-600 */
+    background-color: #D1D5DB;
+    border-color: #2563EB;
   }
   
   .dark .sudoku-grid input:hover {
-    background-color: #374151; /* Gray-700 */
+    background-color: #374151;
   }
   
   .dark .sudoku-grid input:focus {
-    background-color: #4B5563; /* Gray-600 */
-    border-color: #3B82F6; /* Blue-500 */
+    background-color: #4B5563;
+    border-color: #3B82F6;
   }
   
   /* Disabled Input Styling */
   .sudoku-grid input:disabled {
-    background-color: #9CA3AF; /* Gray-400 */
-    color: #1F2937; /* Gray-800 */
+    background-color: #9CA3AF;
+    color: #1F2937;
     cursor: default;
   }
   
   .dark .sudoku-grid input:disabled {
-    background-color: #4B5563; /* Gray-600 */
-    color: #D1D5DB; /* Gray-300 */
+    background-color: #4B5563;
+    color: #D1D5DB;
   }
   
-  /* Adjust font and spacing for the rest of the page */
+  /* Error Highlighting */
+  .sudoku-grid input.error {
+    background-color: #FECACA;
+  }
+  
+  .dark .sudoku-grid input.error {
+    background-color: #B91C1C;
+    color: #F9FAFB;
+  }
+  
+  /* Hint Cell Styling */
+  .sudoku-grid input.hint-cell {
+    background-color: #D1FAE5;
+  }
+  
+  .dark .sudoku-grid input.hint-cell {
+    background-color: #047857;
+    color: #F9FAFB;
+  }
+  
+  /* General Typography */
   body {
     font-family: 'Inter', sans-serif;
   }
