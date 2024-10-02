@@ -4,16 +4,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridElement = document.getElementById('sudoku-grid');
     const difficultySelect = document.getElementById('difficulty');
     const newGameButton = document.getElementById('new-game');
-    const resultsElement = document.getElementById('results');
-    const timerElement = document.getElementById('timer');
+    const resetGameButton = document.getElementById('reset-game');
     const hintButton = document.getElementById('hint-button');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const darkModeIcon = document.getElementById('dark-mode-icon');
+    const errorToggle = document.getElementById('error-toggle');
+    const errorIcon = document.getElementById('error-icon');
+    const timerElement = document.getElementById('timer');
+    const resultsElement = document.getElementById('results');
+    const keypadElement = document.querySelector('.keypad .grid');
   
     let startTime = null;
     let timerInterval = null;
     let solution = null;
     let puzzleBoard = null;
+    let initialPuzzle = null;
+    let errorHighlighting = true;
+    let selectedCell = null;
   
     // Function to generate the Sudoku grid
     function generateGrid(puzzle) {
@@ -21,40 +28,47 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let i = 0; i < 81; i++) {
         const cell = document.createElement('input');
         cell.type = 'text';
-        cell.maxLength = 1;
+        cell.readOnly = true; // Make the cell read-only; input via keypad
         cell.dataset.index = i;
         cell.value = puzzle[i] !== '.' ? puzzle[i] : '';
         if (puzzle[i] !== '.') {
           cell.disabled = true;
         } else {
-          cell.addEventListener('input', onCellInput);
-          cell.addEventListener('focus', () => cell.select());
+          cell.addEventListener('click', () => selectCell(cell));
         }
         gridElement.appendChild(cell);
       }
     }
   
-    // Function to handle cell input
-    function onCellInput(e) {
-      const cell = e.target;
-      const index = parseInt(cell.dataset.index);
-      const value = cell.value;
-  
-      // Remove non-numeric characters
-      if (!/^[1-9]$/.test(value)) {
-        cell.value = '';
-        return;
+    // Function to select a cell
+    function selectCell(cell) {
+      if (selectedCell) {
+        selectedCell.classList.remove('selected');
       }
+      selectedCell = cell;
+      selectedCell.classList.add('selected');
+    }
+  
+    // Function to handle keypad input
+    function onKeypadInput(value) {
+      if (!selectedCell) return;
+      const index = parseInt(selectedCell.dataset.index);
   
       // Update the puzzle board
       puzzleBoard[index] = parseInt(value);
+      selectedCell.value = value;
   
-      // Check for errors
-      if (checkConflicts(index, parseInt(value))) {
-        cell.classList.add('error');
-      } else {
-        cell.classList.remove('error');
+      // Check for errors if highlighting is enabled
+      if (errorHighlighting) {
+        if (checkConflicts(index, parseInt(value))) {
+          selectedCell.classList.add('error');
+        } else {
+          selectedCell.classList.remove('error');
+        }
       }
+  
+      // Save game state
+      saveGameState();
   
       // Check for completion
       if (isComplete()) {
@@ -69,6 +83,35 @@ document.addEventListener('DOMContentLoaded', () => {
           alert('There are errors in your solution.');
         }
       }
+    }
+  
+    // Function to create the keypad
+    function createKeypad() {
+      keypadElement.innerHTML = '';
+      for (let i = 1; i <= 9; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.addEventListener('click', () => onKeypadInput(i));
+        keypadElement.appendChild(button);
+      }
+      // Add an erase button
+      const eraseButton = document.createElement('button');
+      eraseButton.innerHTML = '<i class="fa-solid fa-eraser"></i>';
+      eraseButton.addEventListener('click', eraseCell);
+      keypadElement.appendChild(eraseButton);
+    }
+  
+    // Function to erase the selected cell
+    function eraseCell() {
+      if (!selectedCell) return;
+      const index = parseInt(selectedCell.dataset.index);
+  
+      puzzleBoard[index] = 0;
+      selectedCell.value = '';
+      selectedCell.classList.remove('error');
+  
+      // Save game state
+      saveGameState();
     }
   
     // Function to check for conflicts
@@ -177,86 +220,29 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Function to remove numbers from the complete board based on difficulty
     function createPuzzle(board, difficulty) {
-      let attempts;
+      let clues;
       switch (difficulty) {
         case 'easy':
-          attempts = 30;
+          clues = 45;
           break;
         case 'medium':
-          attempts = 40;
+          clues = 35;
           break;
         case 'hard':
-          attempts = 50;
+          clues = 25;
           break;
         default:
-          attempts = 40;
+          clues = 35;
       }
   
       board = board.slice();
-      while (attempts > 0) {
-        const pos = Math.floor(Math.random() * 81);
-        if (board[pos] !== 0) {
-          const backup = board[pos];
-          board[pos] = 0;
+      const positions = Array.from({ length: 81 }, (_, i) => i);
+      shuffleArray(positions);
   
-          // Make a copy to solve
-          const boardCopy = board.slice();
-          let solutions = 0;
-  
-          function solve(pos) {
-            if (pos >= 81) {
-              solutions++;
-              return solutions === 1;
-            }
-  
-            if (boardCopy[pos] !== 0) {
-              return solve(pos + 1);
-            }
-  
-            for (let num = 1; num <= 9; num++) {
-              if (isValid(num, pos, boardCopy)) {
-                boardCopy[pos] = num;
-                if (!solve(pos + 1)) return false;
-                boardCopy[pos] = 0;
-              }
-            }
-            return true;
-          }
-  
-          function isValid(num, pos, board) {
-            const row = Math.floor(pos / 9);
-            const col = pos % 9;
-  
-            // Check row
-            for (let i = 0; i < 9; i++) {
-              if (board[row * 9 + i] === num) return false;
-            }
-  
-            // Check column
-            for (let i = 0; i < 9; i++) {
-              if (board[i * 9 + col] === num) return false;
-            }
-  
-            // Check box
-            const startRow = row - (row % 3);
-            const startCol = col - (col % 3);
-            for (let i = 0; i < 3; i++) {
-              for (let j = 0; j < 3; j++) {
-                const idx = (startRow + i) * 9 + (startCol + j);
-                if (board[idx] === num) return false;
-              }
-            }
-  
-            return true;
-          }
-  
-          solve(0);
-          if (solutions !== 1) {
-            board[pos] = backup;
-            attempts--;
-          }
-        }
+      for (let i = 0; i < 81 - clues; i++) {
+        board[positions[i]] = 0;
       }
+  
       return board;
     }
   
@@ -268,8 +254,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const completeBoard = generateCompleteBoard();
       solution = completeBoard.slice();
       puzzleBoard = createPuzzle(completeBoard, difficulty);
+      initialPuzzle = puzzleBoard.slice();
       const puzzleString = puzzleBoard.map(num => (num === 0 ? '.' : num)).join('');
       generateGrid(puzzleString);
+      createKeypad();
+      saveGameState();
+    }
+  
+    // Function to reset the game
+    function resetGame() {
+      clearInterval(timerInterval);
+      startTimer();
+      puzzleBoard = initialPuzzle.slice();
+      const puzzleString = puzzleBoard.map(num => (num === 0 ? '.' : num)).join('');
+      generateGrid(puzzleString);
+      saveGameState();
     }
   
     // Function to provide a hint
@@ -288,6 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
       cell.value = solution[randomIndex];
       cell.disabled = true;
       cell.classList.add('hint-cell');
+  
+      saveGameState();
   
       // Check for completion after providing a hint
       if (isComplete() && isSolved()) {
@@ -334,34 +335,117 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsElement.textContent = 'No results to display.';
         return;
       }
-      const table = document.createElement('table');
-      table.className = 'w-full text-left';
-      const headerRow = document.createElement('tr');
-      ['Date', 'Duration (s)', 'Difficulty'].forEach(text => {
-        const th = document.createElement('th');
-        th.className = 'border-b p-2';
-        th.textContent = text;
-        headerRow.appendChild(th);
-      });
-      table.appendChild(headerRow);
+  
+      results.reverse(); // Show latest results first
+  
       results.forEach(result => {
-        const row = document.createElement('tr');
-        ['date', 'duration', 'difficulty'].forEach(key => {
-          const td = document.createElement('td');
-          td.className = 'border-b p-2';
-          td.textContent = key === 'date' ? new Date(result[key]).toLocaleString() : result[key];
-          row.appendChild(td);
-        });
-        table.appendChild(row);
+        const card = document.createElement('div');
+        card.className = 'result-card';
+  
+        const icon = document.createElement('div');
+        icon.className = 'card-icon text-blue-500 dark:text-blue-400';
+        icon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+        card.appendChild(icon);
+  
+        const content = document.createElement('div');
+        content.className = 'card-content';
+  
+        const duration = document.createElement('div');
+        duration.innerHTML = `<span class="label">Duration:</span><span class="value">${result.duration} seconds</span>`;
+        content.appendChild(duration);
+  
+        const difficulty = document.createElement('div');
+        difficulty.innerHTML = `<span class="label">Difficulty:</span><span class="value capitalize">${result.difficulty}</span>`;
+        content.appendChild(difficulty);
+  
+        card.appendChild(content);
+  
+        const date = document.createElement('div');
+        date.className = 'card-date mt-2';
+        date.textContent = new Date(result.date).toLocaleString();
+        card.appendChild(date);
+  
+        resultsElement.appendChild(card);
       });
-      resultsElement.appendChild(table);
+    }
+  
+    // Function to save game state to localStorage
+    function saveGameState() {
+      const gameState = {
+        puzzleBoard,
+        initialPuzzle,
+        solution,
+        startTime: startTime.toISOString(),
+        difficulty: difficultySelect.value,
+        errorHighlighting
+      };
+      localStorage.setItem('sudokuGameState', JSON.stringify(gameState));
+    }
+  
+    // Function to load game state from localStorage
+    function loadGameState() {
+      const savedState = JSON.parse(localStorage.getItem('sudokuGameState'));
+      if (savedState) {
+        puzzleBoard = savedState.puzzleBoard;
+        initialPuzzle = savedState.initialPuzzle;
+        solution = savedState.solution;
+        startTime = new Date(savedState.startTime);
+        difficultySelect.value = savedState.difficulty;
+        errorHighlighting = savedState.errorHighlighting;
+        if (errorHighlighting) {
+          errorIcon.classList.remove('fa-eye-slash');
+          errorIcon.classList.add('fa-eye');
+        } else {
+          errorIcon.classList.remove('fa-eye');
+          errorIcon.classList.add('fa-eye-slash');
+        }
+  
+        generateGrid(puzzleBoard.map(num => (num === 0 ? '.' : num)).join(''));
+        createKeypad();
+        resumeTimer();
+      } else {
+        startNewGame();
+      }
+    }
+  
+    // Function to resume the timer
+    function resumeTimer() {
+      timerInterval = setInterval(() => {
+        const elapsed = new Date() - startTime;
+        timerElement.textContent = `Time: ${formatTime(elapsed)}`;
+      }, 1000);
     }
   
     // Function to toggle dark mode
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.theme = isDark ? 'dark' : 'light';
-      darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+      darkModeIcon.classList.toggle('fa-moon', !isDark);
+      darkModeIcon.classList.toggle('fa-sun', isDark);
+    }
+  
+    // Function to toggle error highlighting
+    function toggleErrorHighlighting() {
+      errorHighlighting = !errorHighlighting;
+      if (errorHighlighting) {
+        errorIcon.classList.remove('fa-eye-slash');
+        errorIcon.classList.add('fa-eye');
+        // Re-apply error highlighting
+        puzzleBoard.forEach((value, index) => {
+          const cell = gridElement.children[index];
+          if (value !== 0 && checkConflicts(index, value)) {
+            cell.classList.add('error');
+          }
+        });
+      } else {
+        errorIcon.classList.remove('fa-eye');
+        errorIcon.classList.add('fa-eye-slash');
+        // Remove existing error highlights
+        gridElement.querySelectorAll('input').forEach(cell => {
+          cell.classList.remove('error');
+        });
+      }
+      saveGameState();
     }
   
     // Utility Function to shuffle an array
@@ -374,14 +458,13 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Event listeners
     newGameButton.addEventListener('click', startNewGame);
+    resetGameButton.addEventListener('click', resetGame);
     hintButton.addEventListener('click', provideHint);
     darkModeToggle.addEventListener('click', toggleDarkMode);
+    errorToggle.addEventListener('click', toggleErrorHighlighting);
   
     // Initialize the game
-    startNewGame();
+    loadGameState();
     loadResults();
-  
-    // Save the result when the user leaves or refreshes the page
-    window.addEventListener('beforeunload', saveResult);
   });
   
